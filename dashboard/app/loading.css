@@ -1,0 +1,14 @@
+.loading {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #8190a3;
+  font: 13px var(--font-geist-mono);
+  text-align: center;
+}
+
+.loading b { color: var(--red); font-size: 18px; }
+.loading code { color: var(--cyan); }

@@ -1,0 +1,331 @@
+{
+  "schema_version": "1.0",
+  "lab_id": "cloudstrike-lab-iam-passrole",
+  "inventory": {
+    "lab_id": "cloudstrike-lab-iam-passrole",
+    "nodes": [
+      {
+        "id": "principal:compromised-app",
+        "kind": "principal",
+        "name": "Compromised public application",
+        "trust": "untrusted",
+        "critical": false,
+        "tags": {}
+      },
+      {
+        "id": "role:app",
+        "kind": "iam_role",
+        "name": "cloudstrike-app-role",
+        "trust": "low",
+        "critical": false,
+        "tags": {}
+      },
+      {
+        "id": "capability:pass-lambda-admin",
+        "kind": "capability",
+        "name": "PassRole grant",
+        "trust": "dangerous",
+        "critical": false,
+        "tags": {}
+      },
+      {
+        "id": "role:lambda-admin",
+        "kind": "iam_role",
+        "name": "cloudstrike-lambda-admin",
+        "trust": "privileged",
+        "critical": false,
+        "tags": {}
+      },
+      {
+        "id": "lambda:attacker-workload",
+        "kind": "lambda",
+        "name": "controlled-simulator",
+        "trust": "low",
+        "critical": false,
+        "tags": {}
+      },
+      {
+        "id": "secret:crown-jewel",
+        "kind": "secret",
+        "name": "demo/database",
+        "trust": "critical",
+        "critical": true,
+        "tags": {}
+      }
+    ],
+    "edges": [
+      {
+        "source": "principal:compromised-app",
+        "target": "role:app",
+        "relation": "CAN_ASSUME",
+        "evidence": "Controlled premise: application role credentials are available inside the lab",
+        "actions": [
+          "sts:AssumeRole"
+        ],
+        "actor": null,
+        "parameters": {}
+      },
+      {
+        "source": "role:app",
+        "target": "capability:pass-lambda-admin",
+        "relation": "CAN_PASS_ROLE",
+        "evidence": "Vulnerable policy lets the app role pass the privileged Lambda role",
+        "actions": [
+          "iam:PassRole"
+        ],
+        "actor": "role:app",
+        "parameters": {
+          "role": "role:lambda-admin"
+        }
+      },
+      {
+        "source": "capability:pass-lambda-admin",
+        "target": "lambda:attacker-workload",
+        "relation": "CAN_CREATE_FUNCTION",
+        "evidence": "The app role can create an allowlisted lab function configured with the passed privileged role",
+        "actions": [
+          "lambda:CreateFunction",
+          "lambda:InvokeFunction"
+        ],
+        "actor": "role:app",
+        "parameters": {
+          "role": "role:lambda-admin"
+        }
+      },
+      {
+        "source": "lambda:attacker-workload",
+        "target": "secret:crown-jewel",
+        "relation": "CAN_READ",
+        "evidence": "Function execution role grants secretsmanager:GetSecretValue on the demo secret",
+        "actions": [
+          "secretsmanager:GetSecretValue"
+        ],
+        "actor": null,
+        "parameters": {}
+      }
+    ]
+  },
+  "summary": {
+    "before": "SUCCESS",
+    "after": "BLOCKED",
+    "critical_asset": "secret:crown-jewel",
+    "path_length": 4,
+    "blocked_at_step": 2,
+    "blocked_reason": "iam:PassRole denied by remediated least-privilege policy",
+    "detections_triggered": 2
+  },
+  "attack_path": {
+    "nodes": [
+      "principal:compromised-app",
+      "role:app",
+      "capability:pass-lambda-admin",
+      "lambda:attacker-workload",
+      "secret:crown-jewel"
+    ],
+    "length": 4,
+    "steps": [
+      {
+        "source": "principal:compromised-app",
+        "relation": "CAN_ASSUME",
+        "target": "role:app",
+        "evidence": "Controlled premise: application role credentials are available inside the lab",
+        "actions": [
+          "sts:AssumeRole"
+        ],
+        "actor": "principal:compromised-app",
+        "parameters": {}
+      },
+      {
+        "source": "role:app",
+        "relation": "CAN_PASS_ROLE",
+        "target": "capability:pass-lambda-admin",
+        "evidence": "Vulnerable policy lets the app role pass the privileged Lambda role",
+        "actions": [
+          "iam:PassRole"
+        ],
+        "actor": "role:app",
+        "parameters": {
+          "role": "role:lambda-admin"
+        }
+      },
+      {
+        "source": "capability:pass-lambda-admin",
+        "relation": "CAN_CREATE_FUNCTION",
+        "target": "lambda:attacker-workload",
+        "evidence": "The app role can create an allowlisted lab function configured with the passed privileged role",
+        "actions": [
+          "lambda:CreateFunction",
+          "lambda:InvokeFunction"
+        ],
+        "actor": "role:app",
+        "parameters": {
+          "role": "role:lambda-admin"
+        }
+      },
+      {
+        "source": "lambda:attacker-workload",
+        "relation": "CAN_READ",
+        "target": "secret:crown-jewel",
+        "evidence": "Function execution role grants secretsmanager:GetSecretValue on the demo secret",
+        "actions": [
+          "secretsmanager:GetSecretValue"
+        ],
+        "actor": "lambda:attacker-workload",
+        "parameters": {}
+      }
+    ]
+  },
+  "before": {
+    "status": "SUCCESS",
+    "reached": "secret:crown-jewel",
+    "stopped_at": null,
+    "reason": null,
+    "events": [
+      {
+        "timestamp": "2026-08-25T23:23:40.652274+00:00",
+        "event_name": "AssumeRole",
+        "actor": "principal:compromised-app",
+        "target": "role:app",
+        "relation": "CAN_ASSUME",
+        "allowed": true,
+        "lab_id": "cloudstrike-lab-iam-passrole",
+        "error": null,
+        "event_source": "sts.amazonaws.com",
+        "request_parameters": {},
+        "authorization_action": null
+      },
+      {
+        "timestamp": "2026-08-25T23:23:40.652274+00:00",
+        "event_name": "CreateFunction20150331",
+        "actor": "role:app",
+        "target": "lambda:attacker-workload",
+        "relation": "CAN_CREATE_FUNCTION",
+        "allowed": true,
+        "lab_id": "cloudstrike-lab-iam-passrole",
+        "error": null,
+        "event_source": "lambda.amazonaws.com",
+        "request_parameters": {
+          "functionName": "cloudstrike-lab-controlled-simulator",
+          "role": "role:lambda-admin"
+        },
+        "authorization_action": null
+      },
+      {
+        "timestamp": "2026-08-25T23:23:40.652274+00:00",
+        "event_name": "GetSecretValue",
+        "actor": "lambda:attacker-workload",
+        "target": "secret:crown-jewel",
+        "relation": "CAN_READ",
+        "allowed": true,
+        "lab_id": "cloudstrike-lab-iam-passrole",
+        "error": null,
+        "event_source": "secretsmanager.amazonaws.com",
+        "request_parameters": {
+          "secretId": "secret:crown-jewel"
+        },
+        "authorization_action": null
+      }
+    ]
+  },
+  "detections": [
+    {
+      "rule_id": "CS-AWS-001",
+      "title": "Privileged lab function created with a passed execution role",
+      "severity": "high",
+      "mitre_techniques": [
+        "T1098",
+        "T1548"
+      ],
+      "event": {
+        "timestamp": "2026-08-25T23:23:40.652274+00:00",
+        "event_name": "CreateFunction20150331",
+        "actor": "role:app",
+        "target": "lambda:attacker-workload",
+        "relation": "CAN_CREATE_FUNCTION",
+        "allowed": true,
+        "lab_id": "cloudstrike-lab-iam-passrole",
+        "error": null,
+        "event_source": "lambda.amazonaws.com",
+        "request_parameters": {
+          "functionName": "cloudstrike-lab-controlled-simulator",
+          "role": "role:lambda-admin"
+        },
+        "authorization_action": null
+      }
+    },
+    {
+      "rule_id": "CS-AWS-002",
+      "title": "Sensitive secret read by simulated attack principal",
+      "severity": "critical",
+      "mitre_techniques": [
+        "T1552.005"
+      ],
+      "event": {
+        "timestamp": "2026-08-25T23:23:40.652274+00:00",
+        "event_name": "GetSecretValue",
+        "actor": "lambda:attacker-workload",
+        "target": "secret:crown-jewel",
+        "relation": "CAN_READ",
+        "allowed": true,
+        "lab_id": "cloudstrike-lab-iam-passrole",
+        "error": null,
+        "event_source": "secretsmanager.amazonaws.com",
+        "request_parameters": {
+          "secretId": "secret:crown-jewel"
+        },
+        "authorization_action": null
+      }
+    }
+  ],
+  "remediation": {
+    "finding": "Low-trust workload role can pass a privileged execution role",
+    "root_cause_edge": {
+      "source": "role:app",
+      "target": "capability:pass-lambda-admin",
+      "relation": "CAN_PASS_ROLE",
+      "evidence": "Vulnerable policy lets the app role pass the privileged Lambda role"
+    },
+    "remove_actions": [
+      "iam:PassRole",
+      "lambda:CreateFunction"
+    ],
+    "replacement": "Remove PassRole and function-creation permissions from the low-trust role.",
+    "terraform_file": "infrastructure/terraform/fixed.tfvars"
+  },
+  "after": {
+    "status": "BLOCKED",
+    "reached": null,
+    "stopped_at": 2,
+    "reason": "iam:PassRole denied by remediated least-privilege policy",
+    "events": [
+      {
+        "timestamp": "2026-08-25T23:23:40.652274+00:00",
+        "event_name": "AssumeRole",
+        "actor": "principal:compromised-app",
+        "target": "role:app",
+        "relation": "CAN_ASSUME",
+        "allowed": true,
+        "lab_id": "cloudstrike-lab-iam-passrole",
+        "error": null,
+        "event_source": "sts.amazonaws.com",
+        "request_parameters": {},
+        "authorization_action": null
+      },
+      {
+        "timestamp": "2026-08-25T23:23:40.652274+00:00",
+        "event_name": "CreateFunction20150331",
+        "actor": "role:app",
+        "target": "capability:pass-lambda-admin",
+        "relation": "CAN_PASS_ROLE",
+        "allowed": false,
+        "lab_id": "cloudstrike-lab-iam-passrole",
+        "error": "iam:PassRole denied by remediated least-privilege policy",
+        "event_source": "lambda.amazonaws.com",
+        "request_parameters": {
+          "role": "role:lambda-admin"
+        },
+        "authorization_action": "iam:PassRole"
+      }
+    ]
+  }
+}

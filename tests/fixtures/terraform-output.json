@@ -1,0 +1,8 @@
+{
+  "lab_id": {"value": "cloudstrike-lab-iam-passrole"},
+  "account_id": {"value": "123456789012"},
+  "aws_region": {"value": "us-east-1"},
+  "app_role_arn": {"value": "arn:aws:iam::123456789012:role/cloudstrike-lab-app-test"},
+  "privileged_role_arn": {"value": "arn:aws:iam::123456789012:role/cloudstrike-lab-lambda-privileged-test"},
+  "secret_arn": {"value": "arn:aws:secretsmanager:us-east-1:123456789012:secret:cloudstrike-lab/demo-database-test"}
+}

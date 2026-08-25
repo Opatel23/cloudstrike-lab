@@ -1,0 +1,21 @@
+title: AWS Lambda Function Created With CloudStrike Privileged Role
+id: 83c57a36-6d19-4d4f-9aa5-cloudstrike001
+status: experimental
+description: Detects CreateFunction using a privileged CloudStrike lab execution role. PassRole is an authorization check and does not produce a standalone CloudTrail event.
+logsource:
+  product: aws
+  service: cloudtrail
+detection:
+  selection:
+    eventSource: lambda.amazonaws.com
+    eventName: CreateFunction20150331
+  filter_lab:
+    requestParameters.functionName|startswith: cloudstrike-lab-
+    requestParameters.role|contains: cloudstrike-lab-lambda-privileged-
+  condition: selection and filter_lab
+level: high
+tags:
+  - attack.persistence
+  - attack.privilege-escalation
+  - attack.t1098
+  - attack.t1548

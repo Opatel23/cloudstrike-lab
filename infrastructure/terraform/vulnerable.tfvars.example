@@ -1,0 +1,4 @@
+lab_owner                     = "replace-with-your-name"
+acknowledge_isolated_sandbox = true
+enable_vulnerable_policy     = true
+

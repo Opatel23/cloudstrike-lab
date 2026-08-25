@@ -1,0 +1,8 @@
+{
+  "Records": [
+    {"eventID":"evt-1","eventTime":"2026-08-25T00:00:00Z","eventName":"CreateFunction20150331","eventSource":"lambda.amazonaws.com","awsRegion":"us-east-1","recipientAccountId":"123456789012","requestParameters":{"functionName":"cloudstrike-lab-controlled-simulator","role":"arn:aws:iam::123456789012:role/cloudstrike-lab-lambda-privileged-test"}},
+    {"eventID":"evt-2","eventTime":"2026-08-25T00:00:01Z","eventName":"GetSecretValue","eventSource":"secretsmanager.amazonaws.com","awsRegion":"us-east-1","recipientAccountId":"123456789012","requestParameters":{"secretId":"arn:aws:secretsmanager:us-east-1:123456789012:secret:cloudstrike-lab/demo-database-test","secretString":"must-not-survive"}},
+    {"eventID":"evt-other","eventName":"GetSecretValue","eventSource":"secretsmanager.amazonaws.com","awsRegion":"us-east-1","recipientAccountId":"999999999999","requestParameters":{"secretId":"production-secret"}},
+    {"eventID":"evt-noise","eventName":"ListBuckets","eventSource":"s3.amazonaws.com","awsRegion":"us-east-1","recipientAccountId":"123456789012","requestParameters":{}}
+  ]
+}
