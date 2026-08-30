@@ -1,5 +1,10 @@
 # CloudStrike Lab
 
+[![CI](https://github.com/Opatel23/cloudstrike-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/Opatel23/cloudstrike-lab/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)
+![Terraform](https://img.shields.io/badge/Terraform-AWS%20lab-844FBA?logo=terraform&logoColor=white)
+![Safety](https://img.shields.io/badge/scope-authorized%20sandbox-2ea44f)
+
 CloudStrike Lab is a controlled AWS breach-simulation platform built around attack chains, not isolated findings. The current MVP proves one full vertical slice:
 
 ```text
@@ -11,6 +16,8 @@ Compromised app → app role → iam:PassRole → privileged Lambda → demo sec
 ```
 
 The repository includes a deliberately vulnerable Terraform lab, a Python attack-graph engine, a safety-gated simulator, CloudTrail-shaped telemetry, ATT&CK-mapped detections, a deterministic remediation, and a machine-readable before/after proof.
+
+> **Portfolio note:** the default experience is a deterministic local simulation. It does not call AWS, deploy infrastructure, or execute live exploitation. AWS-specific commands fail closed unless a dedicated sandbox manifest, matching account, and required lab tags are present.
 
 ## Current status
 
