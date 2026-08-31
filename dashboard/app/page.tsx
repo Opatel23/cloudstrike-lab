@@ -82,6 +82,7 @@ export default function Home() {
           <h1>Find the path.<br /><span>Prove the fix.</span></h1>
           <p className="lede">Trace a controlled AWS breach from a compromised workload to a critical secret, generate evidence, then replay the chain to prove least privilege severs it.</p>
           <div className="assurance-row"><span>Fixture-backed</span><span>No live exploitation</span><span>Deterministic replay</span></div>
+          <div className="hero-actions"><a href="#path">Inspect attack path <span>↓</span></a><a className="secondary" href="/demo-report.json" download>Download evidence JSON</a></div>
         </div>
         <div className="verdict-card">
           <div className="card-label"><span>VALIDATION STATE</span><code>{report.lab_id}</code></div>
@@ -110,6 +111,7 @@ export default function Home() {
         <section id="detections" className="panel">
           <div className="panel-heading"><div><p className="kicker">CLOUDTRAIL-SHAPED TELEMETRY</p><h2>Replay timeline</h2><p className="panel-subtitle">Authorization decisions emitted by the simulator.</p></div><span className="live-dot">{replay.events.length} events</span></div>
           <div className="timeline">{replay.events.map((event, index) => <div className="event" key={`${event.event_name}-${index}`}><span className={!event.allowed || event.event_name === 'GetSecretValue' ? 'critical' : event.event_name === 'CreateFunction20150331' ? 'high' : 'info'} /><div><strong>{event.event_name}</strong><p>{event.event_source} · {event.actor}</p></div><code>{!event.allowed ? 'DENIED' : techniqueByEvent[event.event_name] ?? 'INFO'}</code></div>)}</div>
+          <div className="rule-section"><div className="rule-heading"><span>TRIGGERED RULES</span><span>{report.detections.length} / {report.detections.length} MATCHED</span></div>{report.detections.map((detection) => <article className="rule-card" key={detection.rule_id}><div><code>{detection.rule_id}</code><strong>{detection.event.event_name}</strong></div><div className="rule-tags"><span className={detection.severity}>{detection.severity}</span>{detection.mitre_techniques.map((technique) => <span key={technique}>{technique}</span>)}</div></article>)}</div>
         </section>
 
         <section id="remediation" className="panel remediation">

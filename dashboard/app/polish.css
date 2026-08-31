@@ -16,6 +16,11 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--cyan); }
 .assurance-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
 .assurance-row span { display: flex; align-items: center; gap: 7px; color: #718196; font: 9px var(--font-geist-mono); letter-spacing: .06em; }
 .assurance-row span::before { content: "✓"; display: grid; width: 16px; height: 16px; place-items: center; border: 1px solid #2e5b54; border-radius: 50%; color: var(--cyan); font-size: 9px; }
+.hero-actions { display: flex; align-items: center; gap: 12px; margin-top: 24px; }
+.hero-actions a { padding: 11px 14px; border: 1px solid #367c70; color: var(--cyan); background: #0d201f; text-decoration: none; font-size: 11px; }
+.hero-actions a span { margin-left: 16px; }
+.hero-actions a.secondary { border-color: transparent; color: #77889b; background: transparent; }
+.hero-actions a:hover { border-color: var(--cyan); color: #d8fff6; }
 
 .verdict-card { position: relative; overflow: hidden; }
 .verdict-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 1px; background: linear-gradient(90deg, transparent, var(--cyan), transparent); opacity: .65; }
@@ -36,6 +41,16 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--cyan); }
 .code-card pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 .simulation-note { margin: 10px 0 0; color: #526579; text-align: center; font: 8px var(--font-geist-mono); letter-spacing: .04em; }
 .event:hover { background: #111d29; }
+.rule-section { margin-top: 25px; border-top: 1px solid #233143; }
+.rule-heading { display: flex; justify-content: space-between; padding: 15px 5px 8px; color: #617287; font: 8px var(--font-geist-mono); letter-spacing: .12em; }
+.rule-card { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 12px 5px; border-bottom: 1px solid #1e2a39; }
+.rule-card > div:first-child { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.rule-card code { color: var(--cyan); font-size: 9px; white-space: nowrap; }
+.rule-card strong { overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.rule-tags { display: flex; gap: 5px; }
+.rule-tags span { padding: 4px 6px; border: 1px solid #2b3b4e; color: #718297; font: 7px var(--font-geist-mono); text-transform: uppercase; }
+.rule-tags span.high { border-color: #765d32; color: var(--amber); }
+.rule-tags span.critical { border-color: #70343b; color: var(--red); }
 
 .graph::-webkit-scrollbar { height: 6px; }
 .graph::-webkit-scrollbar-track { background: #0a1119; }
@@ -53,11 +68,14 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--cyan); }
   .hero { padding-top: 34px; }
   .eyebrow-row { align-items: flex-start; flex-direction: column; gap: 8px; }
   .assurance-row { display: grid; grid-template-columns: 1fr 1fr; }
+  .hero-actions { align-items: stretch; flex-direction: column; }
+  .hero-actions a { text-align: center; }
   .panel { padding: 20px 16px; }
   .panel-heading { gap: 14px; }
   .panel-subtitle { display: none; }
   .evidence-chip, .live-dot, .risk { white-space: nowrap; }
   .block-banner div { align-items: flex-start; flex-direction: column; gap: 4px; }
+  .rule-card { align-items: flex-start; flex-direction: column; }
   footer { flex-direction: column; }
 }
 
