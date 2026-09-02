@@ -23,6 +23,12 @@ def run_demo(fixture: str | Path) -> dict:
     detections = detect(before.events)
     return {
         "schema_version": "1.0",
+        "provenance": {
+            "generator": "cloudstrike-engine",
+            "mode": "controlled-local-simulation",
+            "fixture": Path(fixture).name,
+            "live_aws_actions": 0,
+        },
         "lab_id": inventory.lab_id,
         "inventory": inventory.to_dict(),
         "summary": {
@@ -55,3 +61,4 @@ def write_report(report: dict, output: str | Path) -> None:
     destination = Path(output)
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+

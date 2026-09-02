@@ -7,15 +7,32 @@ type PathStep = { source: string; target: string; relation: string; actor: strin
 type EventRecord = { event_name: string; event_source: string; actor: string; target: string; allowed: boolean; error: string | null; authorization_action: string | null };
 type Replay = { status: string; stopped_at: number | null; reason: string | null; events: EventRecord[] };
 type Report = {
+  schema_version: '1.0';
+  provenance: { generator: string; mode: string; fixture: string; live_aws_actions: number };
   lab_id: string;
   inventory: { nodes: NodeRecord[] };
-  summary: { before: string; after: string; path_length: number; detections_triggered: number; blocked_at_step: number; blocked_reason: string };
+  summary: { before: string; after: string; path_length: number; detections_triggered: number; blocked_at_step: number | null; blocked_reason: string | null };
   attack_path: { nodes: string[]; steps: PathStep[] };
   before: Replay;
   after: Replay;
   detections: { rule_id: string; severity: string; mitre_techniques: string[]; event: EventRecord }[];
   remediation: { finding: string; remove_actions: string[]; replacement: string; terraform_file: string };
 };
+
+function parseReport(value: unknown): Report {
+  if (!value || typeof value !== 'object') throw new Error('evidence payload is not an object');
+  const report = value as Partial<Report>;
+  if (report.schema_version !== '1.0') throw new Error(`unsupported report schema: ${String(report.schema_version)}`);
+  if (!report.lab_id?.startsWith('cloudstrike-lab-')) throw new Error('report is not scoped to a CloudStrike lab');
+  if (!report.provenance || report.provenance.mode !== 'controlled-local-simulation' || report.provenance.live_aws_actions !== 0) throw new Error('report provenance is missing or unsafe');
+  if (!Array.isArray(report.inventory?.nodes) || !Array.isArray(report.attack_path?.nodes) || !Array.isArray(report.attack_path?.steps)) throw new Error('report graph is incomplete');
+  if (!report.before || !report.after || !Array.isArray(report.before.events) || !Array.isArray(report.after.events)) throw new Error('replay evidence is incomplete');
+  if (!report.summary || report.summary.before !== report.before.status || report.summary.after !== report.after.status) throw new Error('summary does not match replay evidence');
+  if (report.summary.path_length !== report.attack_path.steps.length || report.attack_path.nodes.length !== report.attack_path.steps.length + 1) throw new Error('attack-path counts are inconsistent');
+  if (!Array.isArray(report.detections) || report.summary.detections_triggered !== report.detections.length) throw new Error('detection counts are inconsistent');
+  if (!report.remediation || !Array.isArray(report.remediation.remove_actions)) throw new Error('remediation evidence is incomplete');
+  return report as Report;
+}
 
 const relationLabels: Record<string, string> = {
   CAN_ASSUME: 'AssumeRole', CAN_PASS_ROLE: 'PassRole grant', CAN_CREATE_FUNCTION: 'CreateFunction', CAN_READ: 'GetSecretValue',
@@ -45,8 +62,9 @@ export default function Home() {
     fetch('/demo-report.json', { cache: 'no-store' })
       .then((response) => {
         if (!response.ok) throw new Error(`report request failed (${response.status})`);
-        return response.json();
+        return response.json() as Promise<unknown>;
       })
+      .then(parseReport)
       .then(setReport)
       .catch((error: Error) => setLoadError(error.message));
   }, []);
@@ -73,7 +91,7 @@ export default function Home() {
       <header className="topbar">
         <a className="brand" href="#overview" aria-label="CloudStrike Lab home"><BrandMark /><span>CloudStrike <b>Lab</b></span></a>
         <nav aria-label="Primary"><a href="#overview">Overview</a><a href="#path">Attack graph</a><a href="#detections">Telemetry</a><a href="#remediation">Remediation</a></nav>
-        <div className="lab-status"><span className="pulse" /> REPORT VERIFIED</div>
+        <div className="lab-status"><span className="pulse" /> SCHEMA {report.schema_version} VERIFIED</div>
       </header>
 
       <section id="overview" className="hero">
@@ -81,7 +99,7 @@ export default function Home() {
           <div className="eyebrow-row"><p className="kicker">SCENARIO 001 · IAM PRIVILEGE ESCALATION</p><span className="scope-badge">LOCAL LAB ONLY</span></div>
           <h1>Find the path.<br /><span>Prove the fix.</span></h1>
           <p className="lede">Trace a controlled AWS breach from a compromised workload to a critical secret, generate evidence, then replay the chain to prove least privilege severs it.</p>
-          <div className="assurance-row"><span>Fixture-backed</span><span>No live exploitation</span><span>Deterministic replay</span></div>
+          <div className="assurance-row"><span>Fixture-backed</span><span>{report.provenance.live_aws_actions} live AWS actions</span><span>Deterministic replay</span></div>
           <div className="hero-actions"><a href="#path">Inspect attack path <span>↓</span></a><a className="secondary" href="/demo-report.json" download>Download evidence JSON</a></div>
         </div>
         <div className="verdict-card">
@@ -123,7 +141,8 @@ export default function Home() {
         </section>
       </div>
 
-      <footer><span>CloudStrike Lab · Authorized local simulation · Report-driven</span><span>Scenario state: <b>{blocked ? 'Remediated' : 'Vulnerable'}</b></span></footer>
+      <footer><span>Evidence: {report.provenance.generator} · {report.provenance.mode} · schema {report.schema_version}</span><span>Scenario state: <b>{blocked ? 'Remediated' : 'Vulnerable'}</b></span></footer>
     </main>
   );
 }
+

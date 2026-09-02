@@ -14,8 +14,19 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(report["summary"]["after"], "BLOCKED")
         self.assertEqual(report["summary"]["blocked_at_step"], 2)
         self.assertEqual(report["summary"]["detections_triggered"], 2)
+        self.assertEqual(report["schema_version"], "1.0")
+        self.assertEqual(
+            report["provenance"],
+            {
+                "generator": "cloudstrike-engine",
+                "mode": "controlled-local-simulation",
+                "fixture": "inventory.json",
+                "live_aws_actions": 0,
+            },
+        )
         self.assertIn("capability", {node["kind"] for node in report["inventory"]["nodes"]})
         self.assertEqual(
             report["remediation"]["remove_actions"],
             ["iam:PassRole", "lambda:CreateFunction"],
         )
+
