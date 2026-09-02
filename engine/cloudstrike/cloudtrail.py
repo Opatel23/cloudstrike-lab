@@ -6,7 +6,6 @@ from typing import Any
 
 from cloudstrike.safety import LabManifest
 
-
 ALLOWED_EVENTS = {"AssumeRole", "CreateFunction20150331", "Invoke20150331", "GetSecretValue"}
 
 
@@ -39,3 +38,4 @@ def ingest_cloudtrail(path: str | Path, manifest: LabManifest) -> list[dict[str,
             "error_code": record.get("errorCode"),
         })
     return accepted
+

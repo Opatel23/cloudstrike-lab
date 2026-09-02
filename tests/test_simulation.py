@@ -6,7 +6,6 @@ from cloudstrike.graph import AttackGraph
 from cloudstrike.remediation import remediated_policy_check, vulnerable_policy_check
 from cloudstrike.simulation import ControlledSimulator
 
-
 FIXTURE = Path(__file__).parents[1] / "scenarios" / "iam-passrole" / "inventory.json"
 
 
@@ -46,3 +45,4 @@ class SimulationTests(unittest.TestCase):
         for check in (vulnerable_policy_check, remediated_policy_check):
             result = ControlledSimulator(inventory.lab_id, check).run(attack_path)
             self.assertNotIn("PassRole", [event.event_name for event in result.events])
+

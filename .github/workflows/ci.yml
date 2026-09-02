@@ -14,8 +14,8 @@ jobs:
     name: Python engine
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip
@@ -35,19 +35,19 @@ jobs:
       run:
         working-directory: dashboard
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v6
+      - uses: pnpm/setup@v2
         with:
           version: 11.19.0
-          run_install: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: pnpm
+          runtime: node@22
+          cache: true
           cache-dependency-path: dashboard/pnpm-lock.yaml
+          working-directory: dashboard
+          install: false
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Lint
         run: pnpm lint
       - name: Build
         run: pnpm build
+

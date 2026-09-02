@@ -20,7 +20,7 @@ class AttackGraph:
     def shortest_path(self, start: str, target: str) -> AttackPath | None:
         if start not in self.nodes or target not in self.nodes:
             raise KeyError("start and target must be known graph nodes")
-        queue = deque([(start, tuple(), (start,))])
+        queue = deque([(start, (), (start,))])
         visited = {start}
         while queue:
             current, edges, nodes = queue.popleft()

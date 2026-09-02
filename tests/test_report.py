@@ -3,7 +3,6 @@ from pathlib import Path
 
 from cloudstrike.report import run_demo
 
-
 FIXTURE = Path(__file__).parents[1] / "scenarios" / "iam-passrole" / "inventory.json"
 
 

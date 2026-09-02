@@ -6,7 +6,6 @@ from cloudstrike.graph import AttackGraph
 from cloudstrike.planning import build_dry_run
 from cloudstrike.safety import LabManifest, SafetyViolation
 
-
 FIXTURE = Path(__file__).parent / "fixtures" / "terraform-output.json"
 TAGS = [{"Key": "Project", "Value": "cloudstrike-lab"}, {"Key": "LabID", "Value": "cloudstrike-lab-iam-passrole"}]
 
@@ -58,4 +57,5 @@ class AwsDiscoveryTests(unittest.TestCase):
             return clients(service, region, "999999999999")
         with self.assertRaisesRegex(SafetyViolation, "does not match"):
             AwsLabDiscovery(manifest, wrong_clients).discover()
+
 

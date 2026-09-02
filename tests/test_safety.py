@@ -3,7 +3,6 @@ from pathlib import Path
 
 from cloudstrike.safety import LabManifest, SafetyViolation, require_lab_tags
 
-
 FIXTURE = Path(__file__).parent / "fixtures" / "terraform-output.json"
 
 
@@ -21,4 +20,5 @@ class SafetyTests(unittest.TestCase):
     def test_tags_fail_closed(self):
         with self.assertRaisesRegex(SafetyViolation, "required"):
             require_lab_tags({"Project": "something-else"}, "cloudstrike-lab-iam-passrole")
+
 

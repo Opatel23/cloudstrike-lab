@@ -4,7 +4,6 @@ from pathlib import Path
 from cloudstrike.discovery import load_inventory
 from cloudstrike.graph import AttackGraph
 
-
 FIXTURE = Path(__file__).parents[1] / "scenarios" / "iam-passrole" / "inventory.json"
 
 
@@ -20,3 +19,4 @@ class GraphTests(unittest.TestCase):
             ["CAN_ASSUME", "CAN_PASS_ROLE", "CAN_CREATE_FUNCTION", "CAN_READ"],
         )
         self.assertEqual(path.edges[2].actor, "role:app")
+

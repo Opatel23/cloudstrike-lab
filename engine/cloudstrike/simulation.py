@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
-from typing import Any, Callable
+from typing import Any, ClassVar
 
 from cloudstrike.model import AttackPath, Edge
 
@@ -37,7 +38,7 @@ class SimulationResult:
 class ControlledSimulator:
     """Replays graph edges only in an explicitly identified Terraform lab."""
 
-    EVENT_METADATA = {
+    EVENT_METADATA: ClassVar[dict[str, tuple[str, str]]] = {
         "CAN_ASSUME": ("AssumeRole", "sts.amazonaws.com"),
         "CAN_CREATE_FUNCTION": ("CreateFunction20150331", "lambda.amazonaws.com"),
         "EXECUTES_AS": ("Invoke20150331", "lambda.amazonaws.com"),
@@ -106,3 +107,4 @@ class ControlledSimulator:
         if edge.relation.value == "CAN_READ":
             return {"secretId": edge.target}
         return {}
+

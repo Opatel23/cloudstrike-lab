@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 import json
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -27,7 +27,7 @@ class LabManifest:
     secret_arn: str
 
     @classmethod
-    def from_terraform_output(cls, path: str | Path) -> "LabManifest":
+    def from_terraform_output(cls, path: str | Path) -> LabManifest:
         raw = json.loads(Path(path).read_text(encoding="utf-8"))
         manifest = cls(
             lab_id=str(_value(raw, "lab_id")),
@@ -70,4 +70,5 @@ def require_lab_tags(tags: list[dict[str, str]] | dict[str, str], lab_id: str) -
     normalized = tags if isinstance(tags, dict) else {tag["Key"]: tag["Value"] for tag in tags}
     if normalized.get("Project") != "cloudstrike-lab" or normalized.get("LabID") != lab_id:
         raise SafetyViolation("resource is missing the required CloudStrike lab tags")
+
 
