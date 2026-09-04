@@ -26,7 +26,10 @@ jobs:
       - name: Test
         run: python -m unittest discover -s tests -v
       - name: Verify deterministic report
-        run: cloudstrike demo --output /tmp/cloudstrike-report.json
+        run: |
+          cloudstrike demo --output /tmp/cloudstrike-report-a.json
+          cloudstrike demo --output /tmp/cloudstrike-report-b.json
+          cmp /tmp/cloudstrike-report-a.json /tmp/cloudstrike-report-b.json
 
   dashboard:
     name: Dashboard

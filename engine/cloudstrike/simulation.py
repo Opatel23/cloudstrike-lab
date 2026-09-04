@@ -45,11 +45,17 @@ class ControlledSimulator:
         "CAN_READ": ("GetSecretValue", "secretsmanager.amazonaws.com"),
     }
 
-    def __init__(self, lab_id: str, policy_check: Callable[[Edge], tuple[bool, str | None]]):
+    def __init__(
+        self,
+        lab_id: str,
+        policy_check: Callable[[Edge], tuple[bool, str | None]],
+        clock: Callable[[], datetime] | None = None,
+    ):
         if not lab_id.startswith("cloudstrike-lab-"):
             raise ValueError("refusing simulation outside a cloudstrike-lab-* environment")
         self.lab_id = lab_id
         self.policy_check = policy_check
+        self.clock = clock or (lambda: datetime.now(UTC))
 
     def run(self, path: AttackPath) -> SimulationResult:
         events: list[SimulationEvent] = []
@@ -63,7 +69,7 @@ class ControlledSimulator:
                 event_name, event_source = self.EVENT_METADATA["CAN_CREATE_FUNCTION"]
                 events.append(
                     SimulationEvent(
-                        timestamp=datetime.now(UTC).isoformat(),
+                        timestamp=self.clock().isoformat(),
                         event_name=event_name,
                         event_source=event_source,
                         actor=edge.actor or edge.source,
@@ -81,7 +87,7 @@ class ControlledSimulator:
             event_name, event_source = self.EVENT_METADATA[edge.relation.value]
             events.append(
                 SimulationEvent(
-                    timestamp=datetime.now(UTC).isoformat(),
+                    timestamp=self.clock().isoformat(),
                     event_name=event_name,
                     event_source=event_source,
                     actor=edge.actor or edge.source,

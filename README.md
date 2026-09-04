@@ -15,7 +15,7 @@ Compromised app → app role → iam:PassRole → privileged Lambda → demo sec
                     fixed replay: BLOCKED at PassRole
 ```
 
-The repository includes a deliberately vulnerable Terraform lab, a Python attack-graph engine, a safety-gated simulator, CloudTrail-shaped telemetry, ATT&CK-mapped detections, a deterministic remediation, and a machine-readable before/after proof.
+The repository includes a deliberately vulnerable Terraform lab, a Python attack-graph engine, a safety-gated simulator, CloudTrail-shaped telemetry, ATT&CK-mapped detections, a deterministic remediation, and a machine-readable before/after proof. Identical local inputs produce byte-for-byte identical reports, including synthetic event timestamps.
 
 > **Portfolio note:** the default experience is a deterministic local simulation. It does not call AWS, deploy infrastructure, or execute live exploitation. AWS-specific commands fail closed unless a dedicated sandbox manifest, matching account, and required lab tags are present.
 
@@ -180,3 +180,4 @@ This is an authorized training lab, not a generic exploitation framework. Do not
 3. Add a small graph/dashboard API so live reports can stream into the UI.
 4. Add scenarios only after scenario 001 passes its live acceptance test: metadata/role abuse, insecure trust, exposed storage, cross-role escalation.
 5. Add experiment metrics for path precision, validation rate, time-to-discovery, detection coverage, and remediation success.
+

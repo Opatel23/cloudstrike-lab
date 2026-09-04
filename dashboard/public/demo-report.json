@@ -188,7 +188,7 @@
     "reason": null,
     "events": [
       {
-        "timestamp": "2026-09-02T17:37:18.086991+00:00",
+        "timestamp": "2026-01-01T00:00:00+00:00",
         "event_name": "AssumeRole",
         "actor": "principal:compromised-app",
         "target": "role:app",
@@ -201,7 +201,7 @@
         "authorization_action": null
       },
       {
-        "timestamp": "2026-09-02T17:37:18.086991+00:00",
+        "timestamp": "2026-01-01T00:00:01+00:00",
         "event_name": "CreateFunction20150331",
         "actor": "role:app",
         "target": "lambda:attacker-workload",
@@ -217,7 +217,7 @@
         "authorization_action": null
       },
       {
-        "timestamp": "2026-09-02T17:37:18.086991+00:00",
+        "timestamp": "2026-01-01T00:00:02+00:00",
         "event_name": "GetSecretValue",
         "actor": "lambda:attacker-workload",
         "target": "secret:crown-jewel",
@@ -243,7 +243,7 @@
         "T1548"
       ],
       "event": {
-        "timestamp": "2026-09-02T17:37:18.086991+00:00",
+        "timestamp": "2026-01-01T00:00:01+00:00",
         "event_name": "CreateFunction20150331",
         "actor": "role:app",
         "target": "lambda:attacker-workload",
@@ -267,7 +267,7 @@
         "T1552.005"
       ],
       "event": {
-        "timestamp": "2026-09-02T17:37:18.086991+00:00",
+        "timestamp": "2026-01-01T00:00:02+00:00",
         "event_name": "GetSecretValue",
         "actor": "lambda:attacker-workload",
         "target": "secret:crown-jewel",
@@ -305,7 +305,7 @@
     "reason": "iam:PassRole denied by remediated least-privilege policy",
     "events": [
       {
-        "timestamp": "2026-09-02T17:37:18.086991+00:00",
+        "timestamp": "2026-01-01T00:00:00+00:00",
         "event_name": "AssumeRole",
         "actor": "principal:compromised-app",
         "target": "role:app",
@@ -318,7 +318,7 @@
         "authorization_action": null
       },
       {
-        "timestamp": "2026-09-02T17:37:18.086991+00:00",
+        "timestamp": "2026-01-01T00:00:01+00:00",
         "event_name": "CreateFunction20150331",
         "actor": "role:app",
         "target": "capability:pass-lambda-admin",

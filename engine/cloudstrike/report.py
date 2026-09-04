@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+from datetime import UTC, datetime, timedelta
+from itertools import count
 from pathlib import Path
 
 from cloudstrike.detection import detect
@@ -8,6 +10,13 @@ from cloudstrike.discovery import load_inventory
 from cloudstrike.graph import AttackGraph
 from cloudstrike.remediation import generate, remediated_policy_check, vulnerable_policy_check
 from cloudstrike.simulation import ControlledSimulator
+
+DEMO_EPOCH = datetime(2026, 1, 1, tzinfo=UTC)
+
+
+def _demo_clock():
+    ticks = count()
+    return lambda: DEMO_EPOCH + timedelta(seconds=next(ticks))
 
 
 def run_demo(fixture: str | Path) -> dict:
@@ -17,9 +26,9 @@ def run_demo(fixture: str | Path) -> dict:
     if not paths:
         raise RuntimeError("no path from compromised application to a critical asset")
     path = paths[0]
-    before = ControlledSimulator(inventory.lab_id, vulnerable_policy_check).run(path)
+    before = ControlledSimulator(inventory.lab_id, vulnerable_policy_check, _demo_clock()).run(path)
     remediation = generate(path)
-    after = ControlledSimulator(inventory.lab_id, remediated_policy_check).run(path)
+    after = ControlledSimulator(inventory.lab_id, remediated_policy_check, _demo_clock()).run(path)
     detections = detect(before.events)
     return {
         "schema_version": "1.0",

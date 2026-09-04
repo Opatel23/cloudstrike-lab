@@ -7,6 +7,9 @@ FIXTURE = Path(__file__).parents[1] / "scenarios" / "iam-passrole" / "inventory.
 
 
 class ReportTests(unittest.TestCase):
+    def test_demo_report_is_deterministic(self):
+        self.assertEqual(run_demo(FIXTURE), run_demo(FIXTURE))
+
     def test_end_to_end_before_after_proof(self):
         report = run_demo(FIXTURE)
         self.assertEqual(report["summary"]["before"], "SUCCESS")
