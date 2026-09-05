@@ -43,6 +43,7 @@ Python 3.11+ is sufficient; the engine has no runtime dependencies.
 ```powershell
 $env:PYTHONPATH = "$PWD/engine"
 python -m cloudstrike demo --output outputs/demo-report.json
+python -m cloudstrike verify-report outputs/demo-report.json
 python -m unittest discover -s tests -v
 ```
 
@@ -86,6 +87,15 @@ pnpm dev
 Open `http://localhost:3000`. Switch between **Before fix** and **After fix**, or press **Apply fix & replay**, to inspect the path, blocking edge, detection timeline, and Terraform policy change.
 
 The Python engine is the source of truth. The dashboard fetches `dashboard/public/demo-report.json`, which the launcher refreshes from `outputs/demo-report.json` on every run.
+
+Before publishing or sharing evidence, validate the report contract:
+
+```powershell
+$env:PYTHONPATH = "$PWD/engine"
+python -m cloudstrike verify-report outputs/demo-report.json
+```
+
+The verifier rejects unsafe provenance, non-CloudStrike lab IDs, mismatched summary fields, path steps that are absent from inventory, replay events from another lab, and detections that do not map back to the vulnerable replay. It also prints a SHA-256 digest for the exact JSON artifact you are sharing.
 
 ## Where to edit or add code
 
@@ -180,4 +190,3 @@ This is an authorized training lab, not a generic exploitation framework. Do not
 3. Add a small graph/dashboard API so live reports can stream into the UI.
 4. Add scenarios only after scenario 001 passes its live acceptance test: metadata/role abuse, insecure trust, exposed storage, cross-role escalation.
 5. Add experiment metrics for path precision, validation rate, time-to-discovery, detection coverage, and remediation success.
-

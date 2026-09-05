@@ -30,6 +30,7 @@ jobs:
           cloudstrike demo --output /tmp/cloudstrike-report-a.json
           cloudstrike demo --output /tmp/cloudstrike-report-b.json
           cmp /tmp/cloudstrike-report-a.json /tmp/cloudstrike-report-b.json
+          cloudstrike verify-report /tmp/cloudstrike-report-a.json
 
   dashboard:
     name: Dashboard
@@ -53,4 +54,3 @@ jobs:
         run: pnpm lint
       - name: Build
         run: pnpm build
-

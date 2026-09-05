@@ -9,6 +9,7 @@ from cloudstrike.discovery import AwsLabDiscovery, boto3_client_factory
 from cloudstrike.planning import build_dry_run
 from cloudstrike.report import run_demo, write_report
 from cloudstrike.safety import LabManifest, SafetyViolation
+from cloudstrike.verification import ReportVerificationError, verify_report_file
 
 
 def _fixture() -> Path:
@@ -28,6 +29,8 @@ def main(argv: list[str] | None = None) -> int:
     trail.add_argument("--manifest", type=Path, required=True)
     trail.add_argument("--input", type=Path, required=True)
     trail.add_argument("--output", type=Path, default=Path("outputs/cloudtrail-events.json"))
+    verify = subparsers.add_parser("verify-report", help="validate a CloudStrike evidence report")
+    verify.add_argument("report", type=Path)
     args = parser.parse_args(argv)
 
     if args.command == "demo":
@@ -62,5 +65,17 @@ def main(argv: list[str] | None = None) -> int:
         args.output.write_text(json.dumps({"events": events}, indent=2) + "\n", encoding="utf-8")
         print(f"Accepted {len(events)} lab-scoped CloudTrail events")
         print(f"Output: {args.output.resolve()}")
+        return 0
+    if args.command == "verify-report":
+        try:
+            result = verify_report_file(args.report)
+        except (OSError, ReportVerificationError) as exc:
+            parser.error(str(exc))
+        print(f"Report verified: {result.path.resolve()}")
+        print(f"Lab: {result.lab_id}")
+        print(f"Attack path edges: {result.path_length}")
+        print(f"Detections: {result.detections}")
+        print(f"Blocked at step: {result.blocked_at_step}")
+        print(f"SHA-256: {result.digest}")
         return 0
     return 2
