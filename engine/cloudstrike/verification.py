@@ -28,6 +28,8 @@ def verify_report_file(path: str | Path) -> VerificationResult:
         report = json.loads(raw)
     except json.JSONDecodeError as exc:
         raise ReportVerificationError(f"invalid JSON: {exc.msg}") from exc
+    except UnicodeDecodeError as exc:
+        raise ReportVerificationError("report must use a supported Unicode encoding") from exc
     verify_report(report)
     summary = report["summary"]
     return VerificationResult(
@@ -61,8 +63,9 @@ def verify_report(report: Any) -> None:
     after = _require_dict(report, "after")
     _verify_replay(before, lab_id, "before")
     _verify_replay(after, lab_id, "after")
+    detections = _require_list(report, "detections")
     _verify_summary(_require_dict(report, "summary"), before, after, len(steps), report)
-    _verify_detections(_require_list(report, "detections"), before, lab_id)
+    _verify_detections(detections, before, lab_id)
     _verify_remediation(_require_dict(report, "remediation"))
 
 
@@ -125,12 +128,17 @@ def _verify_replay(replay: dict[str, Any], lab_id: str, label: str) -> None:
     status = _require_str(replay, "status")
     _require(status in {"SUCCESS", "BLOCKED"}, f"{label} replay has invalid status")
     events = _require_list(replay, "events")
+    _require(events, f"{label} replay has no event evidence")
     if status == "SUCCESS":
         _require(replay.get("stopped_at") is None, f"{label} replay success cannot have stopped_at")
         _require(replay.get("reason") is None, f"{label} replay success cannot have reason")
     if status == "BLOCKED":
-        _require(isinstance(replay.get("stopped_at"), int), f"{label} replay is missing stopped_at")
-        _require(isinstance(replay.get("reason"), str), f"{label} replay is missing reason")
+        stopped_at = replay.get("stopped_at")
+        _require(
+            type(stopped_at) is int and stopped_at > 0,
+            f"{label} replay stopped_at must be a positive integer",
+        )
+        _require_str(replay, "reason")
     for event in events:
         event_obj = _as_dict(event, f"{label} event")
         _require(event_obj.get("lab_id") == lab_id, f"{label} event lab_id does not match")
@@ -138,6 +146,15 @@ def _verify_replay(replay: dict[str, Any], lab_id: str, label: str) -> None:
         _require_str(event_obj, "actor")
         _require_str(event_obj, "target")
         _require(isinstance(event_obj.get("allowed"), bool), f"{label} event allowed must be boolean")
+    allowed = [event["allowed"] for event in events]
+    if status == "SUCCESS":
+        _require(all(allowed), f"{label} successful replay contains a denied event")
+    else:
+        _require(
+            all(allowed[:-1]) and not allowed[-1],
+            f"{label} blocked replay must end at its first denied event",
+        )
+        _require(events[-1].get("error") == replay["reason"], f"{label} denial reason is inconsistent")
 
 
 def _verify_summary(
@@ -165,10 +182,6 @@ def _verify_summary(
 
 
 def _verify_detections(detections: list[Any], before: dict[str, Any], lab_id: str) -> None:
-    before_events = set()
-    for event in before["events"]:
-        event_obj = _as_dict(event, "before event")
-        before_events.add((event_obj["event_name"], event_obj["target"]))
     for detection in detections:
         detection_obj = _as_dict(detection, "detection")
         _require_str(detection_obj, "rule_id")
@@ -177,8 +190,7 @@ def _verify_detections(detections: list[Any], before: dict[str, Any], lab_id: st
         _require_list(detection_obj, "mitre_techniques")
         event = _require_dict(detection_obj, "event")
         _require(event.get("lab_id") == lab_id, "detection event lab_id does not match")
-        event_key = (_require_str(event, "event_name"), _require_str(event, "target"))
-        _require(event_key in before_events, "detection event is not present in vulnerable replay")
+        _require(event in before["events"], "detection event is not present in vulnerable replay")
 
 
 def _verify_remediation(remediation: dict[str, Any]) -> None:

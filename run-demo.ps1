@@ -36,15 +36,12 @@ $env:PYTHONPATH = $enginePath
 Write-Host "[1/3] Generating verified before/after report..." -ForegroundColor Cyan
 & $pythonExe @pythonPrefix -m cloudstrike demo --output $reportPath
 if ($LASTEXITCODE -ne 0) { throw "The CloudStrike engine demo failed." }
+& $pythonExe @pythonPrefix -m cloudstrike verify-report $reportPath
+if ($LASTEXITCODE -ne 0) { throw "The generated report failed verification." }
 
 Copy-Item -LiteralPath $reportPath -Destination $dashboardReportPath -Force
 
 Write-Host "[2/3] Dashboard report updated." -ForegroundColor Cyan
-
-$vinext = Join-Path $dashboardPath "node_modules\.bin\vinext.CMD"
-if (-not (Test-Path $vinext)) {
-    throw "Dashboard dependencies are missing. Run 'pnpm install' inside the dashboard folder once."
-}
 
 if ($VerifyOnly) {
     Write-Host "[3/3] Running engine tests..." -ForegroundColor Cyan
@@ -52,6 +49,11 @@ if ($VerifyOnly) {
     if ($LASTEXITCODE -ne 0) { throw "The CloudStrike engine tests failed." }
     Write-Host "Verification complete: all checks passed." -ForegroundColor Green
     return
+}
+
+$vinext = Join-Path $dashboardPath "node_modules\.bin\vinext.CMD"
+if (-not (Test-Path $vinext)) {
+    throw "Dashboard dependencies are missing. Run 'pnpm install' inside the dashboard folder once."
 }
 
 try {
@@ -77,6 +79,8 @@ if ($Foreground) {
     return
 }
 
+$logDirectory = Join-Path $projectRoot "work"
+New-Item -ItemType Directory -Path $logDirectory -Force | Out-Null
 $logPath = Join-Path $projectRoot "work\dashboard.log"
 $errorLogPath = Join-Path $projectRoot "work\dashboard-error.log"
 $arguments = "/d /c `"`"$vinext`" dev`""

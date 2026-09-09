@@ -62,7 +62,7 @@ From the repository root, use the one-command Windows launcher:
 .\run-demo.ps1
 ```
 
-It generates the report, copies that exact artifact into the dashboard, starts the local site in the background, and waits until the health check passes. If the dashboard is already running, it refreshes the report and tells you to reload the page. You can close PowerShell after it says the site is ready.
+It generates and verifies the report, copies that exact artifact into the dashboard, starts the local site in the background, and waits until the health check passes. Startup logs are saved in `work/dashboard.log` and `work/dashboard-error.log`; the launcher creates this folder automatically. If the dashboard is already running, it refreshes the report and tells you to reload the page. You can close PowerShell after it says the site is ready.
 
 For foreground development with live logs:
 
@@ -70,7 +70,7 @@ For foreground development with live logs:
 .\run-demo.ps1 -Foreground
 ```
 
-To run the full engine verification without starting the server:
+To verify the report and run the engine tests without starting the server (Python only; dashboard dependencies are not required):
 
 ```powershell
 .\run-demo.ps1 -VerifyOnly
@@ -95,7 +95,7 @@ $env:PYTHONPATH = "$PWD/engine"
 python -m cloudstrike verify-report outputs/demo-report.json
 ```
 
-The verifier rejects unsafe provenance, non-CloudStrike lab IDs, mismatched summary fields, path steps that are absent from inventory, replay events from another lab, and detections that do not map back to the vulnerable replay. It also prints a SHA-256 digest for the exact JSON artifact you are sharing.
+The verifier rejects unsafe provenance, non-CloudStrike lab IDs, mismatched summary fields, path steps that are absent from inventory, replay events from another lab, inconsistent denial evidence, and detection events that do not exactly match the vulnerable replay. It also prints a SHA-256 digest for the exact JSON artifact you are sharing. These checks establish internal consistency; they do not authenticate the report's author or prove activity occurred in AWS.
 
 ## Where to edit or add code
 
