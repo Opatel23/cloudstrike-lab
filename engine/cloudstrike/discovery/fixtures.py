@@ -8,6 +8,13 @@ from cloudstrike.model import Edge, EdgeType, Inventory, Node
 
 def load_inventory(path: str | Path) -> Inventory:
     raw = json.loads(Path(path).read_text(encoding="utf-8"))
+    try:
+        return _parse_inventory(raw)
+    except (KeyError, TypeError, ValueError, AttributeError) as exc:
+        raise ValueError(f"invalid inventory in {path}: {exc}") from exc
+
+
+def _parse_inventory(raw: dict) -> Inventory:
     return Inventory(
         lab_id=raw["lab_id"],
         nodes=[Node(**node) for node in raw["nodes"]],

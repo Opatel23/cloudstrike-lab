@@ -40,6 +40,8 @@ See the generated [demo report](outputs/demo-report.json).
 
 Python 3.11+ is sufficient; the engine has no runtime dependencies.
 
+Report saves are atomic: a failed save preserves the previous report. Generated JSON uses UTF-8 and consistent line endings on Windows, macOS, and Linux. If a scenario file is missing or malformed, the demo prints an error and exits with a nonzero status.
+
 ```powershell
 $env:PYTHONPATH = "$PWD/engine"
 python -m cloudstrike demo --output outputs/demo-report.json

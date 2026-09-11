@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import json
+import os
 from datetime import UTC, datetime, timedelta
 from itertools import count
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 from cloudstrike.detection import detect
 from cloudstrike.discovery import load_inventory
@@ -68,6 +70,20 @@ def run_demo(fixture: str | Path) -> dict:
 
 def write_report(report: dict, output: str | Path) -> None:
     destination = Path(output)
+    payload = json.dumps(report, indent=2, allow_nan=False) + "\n"
     destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-
+    temporary = None
+    try:
+        # Keep the temporary file on the same filesystem for atomic replacement.
+        with NamedTemporaryFile(
+            mode="w", encoding="utf-8", newline="\n", dir=destination.parent,
+            prefix=f".{destination.name}.", suffix=".tmp", delete=False,
+        ) as stream:
+            temporary = Path(stream.name)
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        temporary.replace(destination)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)

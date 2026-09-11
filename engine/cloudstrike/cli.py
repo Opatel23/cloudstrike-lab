@@ -34,8 +34,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.command == "demo":
-        report = run_demo(args.fixture)
-        write_report(report, args.output)
+        try:
+            report = run_demo(args.fixture)
+            write_report(report, args.output)
+        except (OSError, ValueError, RuntimeError) as exc:
+            parser.error(f"demo failed: {exc}")
         summary = report["summary"]
         print(f"Attack path before remediation: {summary['before']}")
         print(f"Attack replay after remediation: {summary['after']}")
