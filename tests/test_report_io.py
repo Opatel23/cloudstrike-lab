@@ -24,9 +24,11 @@ class ReportIOTests(unittest.TestCase):
         with TemporaryDirectory() as directory:
             output = Path(directory) / "report.json"
             output.write_bytes(b"previous report")
-            with patch.object(Path, "replace", side_effect=PermissionError("file is locked")):
-                with self.assertRaises(PermissionError):
-                    write_report({"new": True}, output)
+            with (
+                patch.object(Path, "replace", side_effect=PermissionError("file is locked")),
+                self.assertRaises(PermissionError),
+            ):
+                write_report({"new": True}, output)
             self.assertEqual(output.read_bytes(), b"previous report")
             self.assertEqual(list(output.parent.iterdir()), [output])
 
