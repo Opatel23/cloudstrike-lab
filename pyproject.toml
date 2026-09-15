@@ -19,6 +19,9 @@ cloudstrike = "cloudstrike.cli:main"
 [tool.setuptools.packages.find]
 where = ["engine"]
 
+[tool.setuptools.package-data]
+cloudstrike = ["data/iam-passrole/inventory.json"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"

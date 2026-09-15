@@ -13,7 +13,7 @@ from cloudstrike.verification import ReportVerificationError, verify_report_file
 
 
 def _fixture() -> Path:
-    return Path(__file__).resolve().parents[2] / "scenarios" / "iam-passrole" / "inventory.json"
+    return Path(__file__).resolve().parent / "data" / "iam-passrole" / "inventory.json"
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -31,6 +31,15 @@ jobs:
           cloudstrike demo --output /tmp/cloudstrike-report-b.json
           cmp /tmp/cloudstrike-report-a.json /tmp/cloudstrike-report-b.json
           cloudstrike verify-report /tmp/cloudstrike-report-a.json
+      - name: Verify installed package outside checkout
+        run: |
+          python -m pip wheel . --no-deps --wheel-dir /tmp/cloudstrike-wheels
+          python -m venv /tmp/cloudstrike-installed
+          /tmp/cloudstrike-installed/bin/python -m pip install --no-deps /tmp/cloudstrike-wheels/*.whl
+          cd /tmp
+          /tmp/cloudstrike-installed/bin/python -I -m cloudstrike demo --output /tmp/cloudstrike-installed-report.json
+          /tmp/cloudstrike-installed/bin/python -I -m cloudstrike verify-report /tmp/cloudstrike-installed-report.json
+          cmp /tmp/cloudstrike-report-a.json /tmp/cloudstrike-installed-report.json
 
   dashboard:
     name: Dashboard

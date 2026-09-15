@@ -1,0 +1,17 @@
+{
+  "lab_id": "cloudstrike-lab-iam-passrole",
+  "nodes": [
+    {"id": "principal:compromised-app", "kind": "principal", "name": "Compromised public application", "trust": "untrusted"},
+    {"id": "role:app", "kind": "iam_role", "name": "cloudstrike-app-role", "trust": "low"},
+    {"id": "capability:pass-lambda-admin", "kind": "capability", "name": "PassRole grant", "trust": "dangerous"},
+    {"id": "role:lambda-admin", "kind": "iam_role", "name": "cloudstrike-lambda-admin", "trust": "privileged"},
+    {"id": "lambda:attacker-workload", "kind": "lambda", "name": "controlled-simulator", "trust": "low"},
+    {"id": "secret:crown-jewel", "kind": "secret", "name": "demo/database", "trust": "critical", "critical": true}
+  ],
+  "edges": [
+    {"source": "principal:compromised-app", "target": "role:app", "relation": "CAN_ASSUME", "evidence": "Controlled premise: application role credentials are available inside the lab", "actions": ["sts:AssumeRole"]},
+    {"source": "role:app", "target": "capability:pass-lambda-admin", "relation": "CAN_PASS_ROLE", "evidence": "Vulnerable policy lets the app role pass the privileged Lambda role", "actions": ["iam:PassRole"], "actor": "role:app", "parameters": {"role": "role:lambda-admin"}},
+    {"source": "capability:pass-lambda-admin", "target": "lambda:attacker-workload", "relation": "CAN_CREATE_FUNCTION", "evidence": "The app role can create an allowlisted lab function configured with the passed privileged role", "actions": ["lambda:CreateFunction", "lambda:InvokeFunction"], "actor": "role:app", "parameters": {"role": "role:lambda-admin"}},
+    {"source": "lambda:attacker-workload", "target": "secret:crown-jewel", "relation": "CAN_READ", "evidence": "Function execution role grants secretsmanager:GetSecretValue on the demo secret", "actions": ["secretsmanager:GetSecretValue"]}
+  ]
+}

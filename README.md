@@ -56,6 +56,10 @@ python -m pip install -e .
 cloudstrike demo
 ```
 
+For a regular installation, run `python -m pip install .` from the repository root. The engine includes its default scenario, so `cloudstrike demo` works from any folder after installation and writes to that folder's `outputs/` directory. The dashboard and Terraform lab remain in the repository.
+
+To try an edited scenario, pass it explicitly: `cloudstrike demo --fixture scenarios/iam-passrole/inventory.json`. Keep the bundled copy in `engine/cloudstrike/data/iam-passrole/inventory.json` synchronized when changing the default scenario; the tests check that they match.
+
 ## Open the dashboard
 
 From the repository root, use the one-command Windows launcher:

@@ -2,6 +2,7 @@ __pycache__/
 *.py[cod]
 .next/
 dist/
+build/
 next-env.d.ts
 .pytest_cache/
 .ruff_cache/
