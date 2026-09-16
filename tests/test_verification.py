@@ -12,6 +12,43 @@ FIXTURE = Path(__file__).parents[1] / "scenarios" / "iam-passrole" / "inventory.
 
 
 class VerificationTests(unittest.TestCase):
+    def test_inventory_rejects_duplicate_ids_and_dangling_edges(self):
+        for case in ("duplicate", "source", "target"):
+            with self.subTest(case=case):
+                report = run_demo(FIXTURE)
+                if case == "duplicate":
+                    report["inventory"]["nodes"].append(dict(report["inventory"]["nodes"][0]))
+                else:
+                    report["inventory"]["edges"][0][case] = "missing-resource"
+                with self.assertRaises(ReportVerificationError):
+                    verify_report(report)
+
+    def test_critical_asset_must_match_path_and_inventory(self):
+        for case in ("summary", "critical", "reached"):
+            with self.subTest(case=case):
+                report = run_demo(FIXTURE)
+                if case == "summary":
+                    report["summary"]["critical_asset"] = "wrong-resource"
+                elif case == "reached":
+                    report["before"]["reached"] = "wrong-resource"
+                else:
+                    for node in report["inventory"]["nodes"]:
+                        node["critical"] = False
+                with self.assertRaises(ReportVerificationError):
+                    verify_report(report)
+
+    def test_blocked_replay_cannot_claim_success_or_nonexistent_step(self):
+        for case in ("reached", "step"):
+            with self.subTest(case=case):
+                report = run_demo(FIXTURE)
+                if case == "reached":
+                    report["after"]["reached"] = report["summary"]["critical_asset"]
+                else:
+                    report["after"]["stopped_at"] = 999
+                    report["summary"]["blocked_at_step"] = 999
+                with self.assertRaises(ReportVerificationError):
+                    verify_report(report)
+
     def test_missing_or_invalid_detections_raise_contract_error(self):
         for value in (None, {}, 1):
             with self.subTest(value=value):

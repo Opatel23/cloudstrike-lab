@@ -54,6 +54,7 @@ def verify_report(report: Any) -> None:
 
     attack_path = _require_dict(report, "attack_path")
     steps = _require_list(attack_path, "steps")
+    _require(steps, "attack path has no edges")
     path_nodes = _require_list(attack_path, "nodes")
     _require(len(path_nodes) == len(steps) + 1, "attack-path node/edge counts are inconsistent")
     _require(attack_path.get("length") == len(steps), "attack-path length is inconsistent")
@@ -63,6 +64,12 @@ def verify_report(report: Any) -> None:
     after = _require_dict(report, "after")
     _verify_replay(before, lab_id, "before")
     _verify_replay(after, lab_id, "after")
+    for label, replay in (("before", before), ("after", after)):
+        if replay["status"] == "SUCCESS":
+            _require(replay.get("reached") == path_nodes[-1], f"{label} reached asset is inconsistent")
+        else:
+            _require(replay["stopped_at"] <= len(steps), f"{label} stopped_at is outside attack path")
+            _require(replay.get("reached") is None, f"{label} blocked replay cannot reach an asset")
     detections = _require_list(report, "detections")
     _verify_summary(_require_dict(report, "summary"), before, after, len(steps), report)
     _verify_detections(detections, before, lab_id)
@@ -88,9 +95,12 @@ def _verify_inventory(inventory: dict[str, Any], lab_id: str) -> None:
     edges = _require_list(inventory, "edges")
     _require(nodes, "inventory has no nodes")
     _require(edges, "inventory has no edges")
+    node_ids = set()
     for node in nodes:
         node_obj = _as_dict(node, "inventory node")
-        _require_str(node_obj, "id")
+        node_id = _require_str(node_obj, "id")
+        _require(node_id not in node_ids, f"duplicate inventory node id: {node_id}")
+        node_ids.add(node_id)
         _require_str(node_obj, "kind")
         _require_str(node_obj, "name")
     for edge in edges:
@@ -98,6 +108,8 @@ def _verify_inventory(inventory: dict[str, Any], lab_id: str) -> None:
         _require_str(edge_obj, "source")
         _require_str(edge_obj, "target")
         _require_str(edge_obj, "relation")
+        _require(edge_obj["source"] in node_ids, "inventory edge source is absent from nodes")
+        _require(edge_obj["target"] in node_ids, "inventory edge target is absent from nodes")
 
 
 def _verify_path_is_in_inventory(
@@ -167,6 +179,13 @@ def _verify_summary(
     _require(summary.get("before") == before["status"], "summary before status does not match replay")
     _require(summary.get("after") == after["status"], "summary after status does not match replay")
     _require(summary.get("path_length") == path_length, "summary path_length is inconsistent")
+    critical_asset = report["attack_path"]["nodes"][-1]
+    _require(summary.get("critical_asset") == critical_asset, "summary critical_asset is inconsistent")
+    _require(
+        any(node["id"] == critical_asset and node.get("critical") is True
+            for node in report["inventory"]["nodes"]),
+        "attack path does not end at a critical asset",
+    )
     _require(
         summary.get("detections_triggered") == len(report["detections"]),
         "summary detection count is inconsistent",
