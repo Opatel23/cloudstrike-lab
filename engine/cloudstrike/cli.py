@@ -31,6 +31,8 @@ def main(argv: list[str] | None = None) -> int:
     trail.add_argument("--output", type=Path, default=Path("outputs/cloudtrail-events.json"))
     verify = subparsers.add_parser("verify-report", help="validate a CloudStrike evidence report")
     verify.add_argument("report", type=Path)
+    verify.add_argument("--json", action="store_true", dest="json_output",
+                        help="emit one JSON result; exit 0 when valid, 2 when invalid")
     args = parser.parse_args(argv)
 
     if args.command == "demo":
@@ -73,7 +75,21 @@ def main(argv: list[str] | None = None) -> int:
         try:
             result = verify_report_file(args.report)
         except (OSError, ReportVerificationError) as exc:
+            if args.json_output:
+                print(json.dumps({"valid": False, "error": str(exc)}))
+                return 2
             parser.error(str(exc))
+        if args.json_output:
+            print(json.dumps({
+                "valid": True,
+                "path": str(result.path.resolve()),
+                "sha256": result.digest,
+                "lab_id": result.lab_id,
+                "path_length": result.path_length,
+                "detections": result.detections,
+                "blocked_at_step": result.blocked_at_step,
+            }))
+            return 0
         print(f"Report verified: {result.path.resolve()}")
         print(f"Lab: {result.lab_id}")
         print(f"Attack path edges: {result.path_length}")

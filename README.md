@@ -103,6 +103,8 @@ python -m cloudstrike verify-report outputs/demo-report.json
 
 The verifier rejects unsafe provenance, non-CloudStrike lab IDs, mismatched summary fields, path steps that are absent from inventory, replay events from another lab, inconsistent denial evidence, and detection events that do not exactly match the vulnerable replay. It also prints a SHA-256 digest for the exact JSON artifact you are sharing. These checks establish internal consistency; they do not authenticate the report's author or prove activity occurred in AWS.
 
+For scripts and CI, `cloudstrike verify-report outputs/demo-report.json --json` prints a single JSON object. A valid report includes `valid: true`, its SHA-256 digest, lab ID, path length, detection count, and blocking step. Invalid or unreadable reports return `valid: false` with an `error` message. Exit codes are 0 for valid and 2 for invalid; the default text output is unchanged.
+
 ## Where to edit or add code
 
 - Python engine: `engine/cloudstrike/`
