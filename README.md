@@ -5,7 +5,7 @@
 ![Terraform](https://img.shields.io/badge/Terraform-AWS%20lab-844FBA?logo=terraform&logoColor=white)
 ![Safety](https://img.shields.io/badge/scope-authorized%20sandbox-2ea44f)
 
-CloudStrike Lab is a controlled AWS breach-simulation platform built around attack chains, not isolated findings. The current MVP proves one full vertical slice:
+CloudStrike Lab demonstrates how an overly permissive AWS role can expose a secret, how to detect the simulated activity, and how least-privilege remediation blocks the same path. The local demo follows one complete attack chain:
 
 ```text
 Compromised app → app role → iam:PassRole → privileged Lambda → demo secret
@@ -62,7 +62,15 @@ To try an edited scenario, pass it explicitly: `cloudstrike demo --fixture scena
 
 ## Open the dashboard
 
-From the repository root, use the one-command Windows launcher:
+First install the dashboard dependencies with Node.js 22.13+ and pnpm:
+
+```powershell
+cd dashboard
+pnpm install --frozen-lockfile
+cd ..
+```
+
+Then, from the repository root, use the one-command Windows launcher:
 
 ```powershell
 .\run-demo.ps1
@@ -93,6 +101,8 @@ pnpm dev
 Open `http://localhost:3000`. Switch between **Before fix** and **After fix**, or press **Apply fix & replay**, to inspect the path, blocking edge, detection timeline, and Terraform policy change.
 
 The Python engine is the source of truth. The dashboard fetches `dashboard/public/demo-report.json`, which the launcher refreshes from `outputs/demo-report.json` on every run.
+
+For a short presentation, follow the [demo walkthrough](docs/demo-walkthrough.md). The [Cybersecurity Portfolio](https://github.com/Opatel23/cybersecurity-portfolio) contains the separate Colab learning projects.
 
 Before publishing or sharing evidence, validate the report contract:
 
